@@ -53,40 +53,44 @@ const Sidebar = () => {
   );
 
   return (
-    <div 
-      className={`flex flex-col h-screen bg-gray-800 text-white transition-width duration-300 ${isExpanded ? 'w-80 shadow-lg' : 'w-20'} ${isPinned ? 'shadow-lg' : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="flex items-center justify-between h-16 bg-gray-900 px-4">
-        <h1 className={`text-2xl font-bold transition-opacity duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>BCRM</h1>
-        <FaThumbtack 
-          className={`text-xl cursor-pointer ${isPinned ? 'text-yellow-500' : 'text-white'}`} 
-          onClick={handlePinClick} 
-        />
-      </div>
-      <nav className="flex-grow p-4">
-        <div className="flex items-center bg-gray-700 rounded px-4 py-2 mb-4" onClick={handleSearchClick}>
-          <FaSearch className="text-gray-400"/>
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className={`bg-gray-700 text-white ml-2 focus:outline-none transition-width duration-300 ${isExpanded ? 'w-full' : 'w-0'}`}
-          />
+    <div className="relative flex min-h-screen">
+      <div 
+        className={`flex flex-col h-screen bg-gray-800 text-white transition-width duration-300 ${isExpanded ? 'w-80 shadow-lg' : 'w-20'} ${isPinned ? 'shadow-lg' : ''}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="flex items-center justify-center h-16 bg-gray-900">
+          <h1 className={`text-2xl font-bold transition-opacity duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>BCRM</h1>
         </div>
-        <ul className="space-y-2">
-          {filteredItems.map((item, index) => (
-            <li key={index}>
-              <Link href={item.href} className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 rounded" onClick={handleLinkClick}>
-                {item.icon}
-                <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>{item.label}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+        <nav className="flex-grow p-4">
+          <div className="flex items-center bg-gray-700 rounded px-4 py-2 mb-4" onClick={handleSearchClick}>
+            <FaSearch className="text-gray-400"/>
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className={`bg-gray-700 text-white ml-2 focus:outline-none transition-width duration-300 ${isExpanded ? 'w-full' : 'w-0'}`}
+            />
+          </div>
+          <ul className="space-y-2">
+            {filteredItems.map((item, index) => (
+              <li key={index}>
+                <Link href={item.href} className="flex items-center space-x-2 px-4 py-2 hover:bg-gray-700 rounded" onClick={handleLinkClick}>
+                  <span className="text-xl">{item.icon}</span>
+                  <span className={`transition-opacity duration-300 ${isExpanded ? 'opacity-100' : 'opacity-0'}`}>{item.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+      <div 
+        className={`absolute top-4 left-${isExpanded ? '80' : '20'} transition-all duration-300 transform ${isPinned ? 'rotate-45' : 'rotate-0'}`}
+        onClick={handlePinClick}
+      >
+        <FaThumbtack className={`text-2xl cursor-pointer ${isPinned ? 'text-yellow-500' : 'text-white'}`} />
+      </div>
     </div>
   );
 };
