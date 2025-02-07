@@ -30,7 +30,7 @@ export default function RootLayout({ children }) {
       {/* Main Content with Backdrop */}
       <div className="flex-grow relative">
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-black/5"></div>
 
         {/* Children Content */}
         <div className="relative z-10 p-8">

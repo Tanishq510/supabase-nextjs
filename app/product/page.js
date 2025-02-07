@@ -1,44 +1,9 @@
 // app/product/page.js
 'use client'; // Mark this as a Client Component
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-
-// Dummy data for Product
-const products = [
-  {
-    id: 1,
-    name: 'Electronics',
-    category:'Category1',
-    quantity:10,
-    status: 'Active',
-    description: 'Devices and gadgets for everyday use.',
-  },
-  {
-    id: 2,
-    name: 'Clothing',
-    category:'Category1',
-    quantity:10,
-    status: 'Active',
-    description: 'Fashionable apparel for all ages.',
-  },
-  {
-    id: 3,
-    name: 'Furniture',
-    category:'hello',
-    quantity:10,
-    status: 'Inactive',
-    description: 'Home and office furniture collections.',
-  },
-  {
-    id: 4,
-    name: 'Books',
-    category:'Test',
-    quantity:10,
-    status: 'Active',
-    description: 'Educational and recreational reading materials.',
-  },
-];
+import { supabase } from '@/utils/supabase';
 
 // Validation schema using Yup
 const validationSchema = Yup.object({
@@ -49,6 +14,30 @@ const validationSchema = Yup.object({
 
 export default function ProductPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [products,setProduct] = useState([])
+
+  useEffect(()=>{
+    fetchProducts()
+  },[])
+
+  const fetchProducts =  async ()=>{
+    try {
+    let { data: products, error } = await supabase
+    .from('products')
+    .select(`
+    *,
+    categories (
+      id,
+      name
+    )
+  `)
+    console.log('---------->',products)
+
+    setProduct(products)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   // Handler for form submission
   const handleSubmit = (values) => {
@@ -75,32 +64,51 @@ export default function ProductPage() {
                 Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Quantity
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Description
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {products.map((category) => (
-              <tr key={category.id} className="hover:bg-gray-50 transition-colors">
+            {products.map((product) => (
+              <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {category.name}
+                  {product.name}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {product.categories.name}
+                </td>
+               
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {product.quantity}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {product.description}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      category.status === 'Active'
+                      product.status === 'active'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {category.status}
+                    {product.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {category.description}
+                <td className="px-6 py-4 whitespace-nowrap">
+                 
                 </td>
               </tr>
             ))}
