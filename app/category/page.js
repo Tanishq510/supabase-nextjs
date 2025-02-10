@@ -8,16 +8,27 @@ import Skeleton from 'react-loading-skeleton';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-loading-skeleton/dist/skeleton.css';
 import 'react-toastify/dist/ReactToastify.css';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { ERROR } from '@/utils/errorMessage';
+import { FaPen, FaTrash } from 'react-icons/fa';
 
 const CategoryPage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [deleteCategoryId, setDeleteCategoryId] = useState(null);
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(()=>{
+    if(!isModalOpen){
+      setSelectedCategory(null);
+    }
+  },[isModalOpen])
 
   const fetchCategories = async () => {
     setIsLoading(true);
@@ -37,15 +48,14 @@ const CategoryPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (category) => {
+  const handleDelete = async (categoryId) => {
     const { error } = await supabase
       .from('categories')
       .delete()
-      .eq('id', category.id);
+      .eq('id', categoryId);
     if (error) {
-      console.error('Error deleting category:', error.message);
+      throw new Error(error);
     } else {
-      console.log('Category deleted:', category.id);
       fetchCategories(); // Refresh the list
     }
   };
@@ -82,6 +92,21 @@ const CategoryPage = () => {
     setSelectedCategory(null);
   };
 
+  const confirmDelete = ({id}) => {
+    setConfirmModal(true);
+    setDeleteCategoryId(id)
+  }
+
+  const deleteCategory = async () => {
+    try {
+      await handleDelete(deleteCategoryId);
+      setConfirmModal(false);
+      toast.success('Category Deleted successfully!');
+    } catch (error) {
+      toast.error('Error deleting category');
+    }
+  }
+
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
     description: Yup.string().required('Description is required'),
@@ -97,7 +122,7 @@ const CategoryPage = () => {
             <thead className="bg-gray-100">
               <tr>
                 <th className="py-3 px-4 border-b border-gray-200 text-left text-sm font-semibold text-gray-700">Name</th>
-                <th className="py-3 px-4 border-b border-gray-200 text-left text-sm font-semibold text-gray-700">Description</th>
+                <th className="py-3 px-4 border-b border-gray-200 text-left text-sm font-semibold text-gray-700" style={{ width: '40%' }}>Description</th>
                 <th className="py-3 px-4 border-b border-gray-200 text-left text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
@@ -105,10 +130,10 @@ const CategoryPage = () => {
               {categories.map((category) => (
                 <tr key={category.id} className="hover:bg-gray-50 transition duration-200">
                   <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">{category.name}</td>
-                  <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">{category.description}</td>
+                  <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700" style={{ width: '40%' }}>{category.description}</td>
                   <td className="py-3 px-4 border-b border-gray-200 text-sm text-gray-700">
-                    <button onClick={() => handleEdit(category)} className="text-blue-500 hover:text-blue-700 mr-2">Edit</button>
-                    <button onClick={() => handleDelete(category)} className="text-red-500 hover:text-red-700">Delete</button>
+                    <button onClick={() => handleEdit(category)} className="text-blue-500 hover:text-blue-700 mr-2"><FaPen/></button>
+                    <button onClick={() => confirmDelete(category)} className="text-pink-700 hover:text-pink-900"><FaTrash/></button>
                   </td>
                 </tr>
               ))}
@@ -137,6 +162,7 @@ const CategoryPage = () => {
                       type="text"
                       id="name"
                       name="name"
+                      placeholder="Category Name"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                     <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
@@ -147,6 +173,7 @@ const CategoryPage = () => {
                       type="text"
                       id="description"
                       name="description"
+                      placeholder="Category Description"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                     <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
@@ -172,6 +199,14 @@ const CategoryPage = () => {
           </div>
         </div>
       )}
+      <ConfirmModal 
+      isOpen={confirmModal} 
+      onClose={() => {
+        setConfirmModal(false)
+        setDeleteCategoryId(null)
+      }} 
+      onConfirm={deleteCategory}
+       message="Are you sure you want to delete this category?" />
     </div>
   );
 };
